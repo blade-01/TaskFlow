@@ -1,6 +1,6 @@
-import { create } from "zustand";
+import { StateCreator } from "zustand";
 
-interface ThemeState {
+export interface ThemeState {
   theme: "light" | "dark";
   toggleTheme: () => void;
   setTheme: (theme: "light" | "dark") => void;
@@ -21,7 +21,7 @@ function getInitialTheme(): "light" | "dark" {
   return "light";
 }
 
-export const useThemeStore = create<ThemeState>((set) => ({
+export const useThemeStore: StateCreator<ThemeState> = (set) => ({
   theme: getInitialTheme(),
   toggleTheme: () =>
     set((state) => {
@@ -30,10 +30,10 @@ export const useThemeStore = create<ThemeState>((set) => ({
       document.documentElement.classList.toggle("dark", newTheme === "dark");
       return { theme: newTheme };
     }),
-  setTheme: (theme) =>
+  setTheme: (theme: "light" | "dark") =>
     set(() => {
       localStorage.setItem("theme", theme);
       document.documentElement.classList.toggle("dark", theme === "dark");
       return { theme };
     })
-}));
+});
