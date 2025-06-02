@@ -6,13 +6,19 @@ export default function CenterModal({
   header,
   footer,
   visible,
-  setVisible
+  setVisible,
+  showCloseButton = true,
+  draggable = false,
+  persistent = true
 }: {
   children?: React.ReactNode;
   title?: string;
   header?: React.ReactNode;
   footer?: React.ReactNode;
   visible: boolean;
+  showCloseButton?: boolean;
+  draggable?: boolean;
+  persistent?: boolean;
   setVisible: (visible: boolean) => void;
 }) {
   const headerElement = header ? (
@@ -34,6 +40,14 @@ export default function CenterModal({
           if (!visible) return;
           setVisible(false);
         }}
+        modal
+        pt={{
+          closeButton: {
+            className: showCloseButton ? "" : "hidden"
+          }
+        }}
+        draggable={draggable}
+        dismissableMask={persistent}
       >
         <div className="p-4">{children}</div>
       </Dialog>
