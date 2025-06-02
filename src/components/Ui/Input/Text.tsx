@@ -1,6 +1,12 @@
 import { InputText } from "primereact/inputtext";
 import { cn } from "../../../utils";
-import { Controller, Control, FieldValues, Path } from "react-hook-form";
+import {
+  Controller,
+  Control,
+  FieldValues,
+  Path,
+  RegisterOptions
+} from "react-hook-form";
 
 interface InputTextProps<TFormValues extends FieldValues> {
   name: Path<TFormValues>;
@@ -13,6 +19,8 @@ interface InputTextProps<TFormValues extends FieldValues> {
   outerClass?: string;
   prependIcon?: React.ReactNode;
   appendIcon?: React.ReactNode;
+  rules?: RegisterOptions<TFormValues, Path<TFormValues>>;
+  type?: string;
 }
 
 export default function UiInputText<TFormValues extends FieldValues>({
@@ -25,7 +33,9 @@ export default function UiInputText<TFormValues extends FieldValues>({
   requiredMark = false,
   outerClass,
   prependIcon,
-  appendIcon
+  appendIcon,
+  rules,
+  type
 }: InputTextProps<TFormValues>) {
   return (
     <div className={cn("input-group", { error }, outerClass)}>
@@ -44,7 +54,10 @@ export default function UiInputText<TFormValues extends FieldValues>({
         <Controller
           name={name}
           control={control}
-          rules={requiredMark ? { required: `${label} is required` } : {}}
+          rules={{
+            ...(requiredMark ? { required: `${label} is required` } : {}),
+            ...rules
+          }}
           render={({ field }) => (
             <InputText
               {...field}
@@ -54,6 +67,7 @@ export default function UiInputText<TFormValues extends FieldValues>({
                 "pr-10": appendIcon
               })}
               placeholder={placeholder}
+              type={type}
             />
           )}
         />
