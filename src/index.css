@@ -81,7 +81,23 @@
             lg:ml-0 lg:w-full;
   }
   .mainbar-content {
-    @apply p-4;
+    @apply p-4 flex items-start gap-5 overflow-x-auto;
+  }
+
+  .board-wrapper {
+    @apply h-[calc(90vh-var(--sidebar-height))] overflow-y-auto min-w-[280px];
+  }
+
+  .mainbar-content::-webkit-scrollbar {
+    width: 2px !important;
+    height: 8px !important;
+  }
+  .mainbar-content::-webkit-scrollbar-track {
+    background: var(--color-sidebar-bg);
+  }
+  .mainbar-content::-webkit-scrollbar-thumb {
+    background: var(--color-sidebar-text);
+    border-radius: 50px !important;
   }
 
   .sidebar {
@@ -172,7 +188,7 @@
 
   /* BUTTON COLORS */
   .btn-default {
-    @apply !bg-gray-200 !text-main-text hover:bg-gray-300 transition-all duration-300;
+    @apply !bg-gray-200 dark:!bg-gray-500 !text-main-text hover:bg-gray-300 transition-all duration-300;
   }
 
   .btn-success {
@@ -184,7 +200,7 @@
   }
 
   .btn-danger {
-    @apply bg-red-500 text-main-text hover:bg-red-600 transition-all duration-300;
+    @apply bg-red-500 text-white hover:bg-red-600 transition-all duration-300;
   }
 
   .btn-danger-inverse {
