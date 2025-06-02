@@ -8,16 +8,7 @@ import { truncateString } from "../../utils";
 import { NavLink } from "react-router";
 import { useSidebar } from "../../context/SidebarContext";
 import BoardForm from "../Form/Board";
-
-import {
-  where,
-  query,
-  collection,
-  getDocs,
-  Timestamp,
-  orderBy
-} from "firebase/firestore";
-import { db } from "../../firebase";
+import { useMainStore } from "../../store/main";
 import CenterModal from "../Ui/Modal/Center";
 
 interface SidebarProps {
@@ -25,6 +16,7 @@ interface SidebarProps {
 }
 
 interface LinkItem {
+  id: string;
   name: string;
   icon?: React.ReactNode;
   sub?: { id: string; name: string }[];
@@ -38,47 +30,19 @@ export default function Sidebar({ nav }: SidebarProps) {
   const { toggleSidebar } = useSidebar();
   const [links, setLinks] = useState<LinkItem[]>();
   const { user, logout } = useAuth();
+  const { getBoards, boards } = useMainStore();
 
-  // Get boards
-  interface Board {
-    name: string;
-    columns: { name: string; color: string }[];
-    createdAt: Timestamp;
-    createdBy: string;
-  }
-
-  const [boards, setBoards] = useState<Board[]>([]);
-  const getBoards = async () => {
-    try {
-      const q = query(
-        collection(db, "boards"),
-        where("createdBy", "in", ["admin", user?.uid]),
-        orderBy("createdAt", "desc")
-      );
-      const querySnapshot = await getDocs(q);
-      const boardsData = querySnapshot.docs.map((doc) => {
-        const data = doc.data();
-        return {
-          name: data.name,
-          columns: data.columns,
-          createdAt: data.createdAt,
-          createdBy: data.createdBy
-        } as Board;
-      });
-      setBoards(boardsData);
-    } catch (error) {
-      console.error("Error fetching boards:", error);
-    }
-  };
-  // Call getBoards when the component mounts
   useEffect(() => {
-    getBoards();
+    if (user?.uid) {
+      getBoards(user.uid);
+    }
   }, []);
 
   useEffect(() => {
     const mappedBoards = boards.map((board) => {
       return {
         ...board,
+        id: board.id!,
         icon: <MdOutlineDashboard />
       };
     });
@@ -89,7 +53,7 @@ export default function Sidebar({ nav }: SidebarProps) {
   const toggleDropdown = (clickedLink: LinkItem) => {
     setLinks((prevLinks) =>
       prevLinks?.map((link) =>
-        link.name === clickedLink.name ? { ...link, show: !link.show } : link
+        link.id === clickedLink.id ? { ...link, show: !link.show } : link
       )
     );
   };
@@ -146,7 +110,7 @@ export default function Sidebar({ nav }: SidebarProps) {
                     >
                       <p className="flex items-center gap-3 ">
                         {link.icon && link.icon}
-                        <span className="text-sm uppercase ">{link.name}</span>
+                        <span className="text-sm">{link.name}</span>
                       </p>
                       <FiChevronDown
                         className={`${
@@ -175,7 +139,7 @@ export default function Sidebar({ nav }: SidebarProps) {
                   </>
                 ) : (
                   <NavLink
-                    to={`/board/${link.name}`}
+                    to={`/board/${link.id}`}
                     key={index}
                     className="sidebar-item flex items-center gap-3 cursor-pointer"
                     onClick={() => {
@@ -183,7 +147,7 @@ export default function Sidebar({ nav }: SidebarProps) {
                     }}
                   >
                     {link.icon && link.icon}
-                    <p className="text-sm uppercase">{link.name}</p>
+                    <p className="text-sm capitalize font-bold">{link.name}</p>
                   </NavLink>
                 )}
               </div>
