@@ -1,8 +1,8 @@
 import { Classic } from "@theme-toggles/react";
-import { useThemeStore } from "../../store/theme";
 import { cn } from "../../utils/index";
 import { PrimeReactContext } from "primereact/api";
 import { useEffect, useContext } from "react";
+import { useMainStore } from "../../store/main";
 
 export default function ThemeSwitcher({
   outerClass,
@@ -11,7 +11,7 @@ export default function ThemeSwitcher({
   outerClass?: string;
   wrapperClass?: string;
 }) {
-  const { toggleTheme, theme } = useThemeStore();
+  const { toggleTheme, theme } = useMainStore();
   const { changeTheme } = useContext(PrimeReactContext);
 
   // Dynamically switch PrimeReact theme
