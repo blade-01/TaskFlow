@@ -4,8 +4,10 @@ import { useSidebar } from "../context/SidebarContext";
 import { cn } from "../utils";
 
 export default function DashboardLayout({
+  title,
   children
 }: {
+  title: string;
   children: React.ReactNode;
 }) {
   const { nav } = useSidebar();
@@ -17,7 +19,7 @@ export default function DashboardLayout({
           "mainbar-opened": nav
         })}
       >
-        <Topbar title="Welcome to TaskFlow" />
+        <Topbar title={title} />
         <div className="mainbar-content">{children}</div>
       </main>
     </div>
