@@ -2,36 +2,49 @@ import { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa6";
 import useAuth from "../../hooks/useAuth";
-import { db } from "../../firebase";
-import { Timestamp, setDoc, doc } from "firebase/firestore";
+import { Timestamp } from "firebase/firestore";
 import UiInputText from "../Ui/Input/Text";
 import UiBtn from "../Ui/Btn";
 import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { getErrorMessage } from "../../utils/error";
+import { useMainStore } from "../../store/main";
+import { v4 as uuidv4 } from "uuid";
 
 export default function Board({
-  setVisible
+  setVisible,
+  isEdit = false,
+  board
 }: {
   setVisible: (visible: boolean) => void;
+  isEdit?: boolean;
+  board?: {
+    id?: string;
+    name: string;
+    columns: { name: string; color: string; id: string }[];
+    createdAt: Timestamp;
+    createdBy: string;
+  };
 }) {
   const { user } = useAuth();
+  const { createBoard, updateBoard } = useMainStore();
 
   type Inputs = {
-    boardName: string;
-    columns: { name: string }[];
+    name: string;
+    columns: { name: string; color: string; id?: string }[];
   };
 
   const {
-    register,
     control,
     handleSubmit,
     reset,
     formState: { errors }
   } = useForm<Inputs>({
-    defaultValues: {
-      boardName: "",
-      columns: [{ name: "" }]
-    }
+    defaultValues: isEdit
+      ? board
+      : {
+          name: "",
+          columns: [{ name: "", color: "", id: uuidv4() }]
+        }
   });
 
   const { fields, append, remove } = useFieldArray({
@@ -41,19 +54,26 @@ export default function Board({
 
   const [loading, setLoading] = useState(false);
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
-    const { boardName, columns } = data;
-    setLoading(true);
+    const { name, columns } = data;
     const payload = {
-      name: boardName,
+      name: name,
       columns: columns.map((column) => ({
+        id: column.id || uuidv4(),
         name: column.name,
-        color: "#" + Math.floor(Math.random() * 16777215).toString(16)
+        color:
+          column.color ||
+          "#" + Math.floor(Math.random() * 16777215).toString(16)
       })),
       createdAt: Timestamp.now(),
-      createdBy: user?.uid
+      createdBy: user?.uid || ""
     };
     try {
-      await setDoc(doc(db, "boards", boardName), payload);
+      setLoading(true);
+      if (isEdit && board) {
+        await updateBoard(board.id!, payload);
+      } else {
+        await createBoard(payload);
+      }
     } catch (error) {
       getErrorMessage(error);
     } finally {
@@ -66,12 +86,12 @@ export default function Board({
     <div>
       <form onSubmit={handleSubmit(onSubmit)}>
         <UiInputText
-          name="boardName"
+          name="name"
           label="Board Name"
           placeholder="e.g. Business roadmap"
-          register={register}
+          control={control}
           requiredMark
-          error={errors.boardName?.message}
+          error={errors.name?.message}
         />
         <p className="text-sm font-medium text-main-text mb-1 mt-5">
           Board Columns
@@ -82,7 +102,8 @@ export default function Board({
               name={`columns.${index}.name`}
               label={`Column ${index + 1}`}
               labelClass="hidden"
-              register={register}
+              control={control}
+              requiredMark
               error={errors.columns?.[index]?.name?.message}
               outerClass="w-full"
             />
@@ -104,12 +125,12 @@ export default function Board({
             size="sm"
             outerClass="w-full  rounded-full bg-white border border-btn-bg text-btn-bg"
             prependIcon={<FaPlus />}
-            onClick={() => append({ name: "" })}
+            onClick={() => append({ name: "", color: "", id: uuidv4() })}
             type="button"
           />
 
           <UiBtn
-            label="Create new board"
+            label={isEdit ? "Save changes" : "Create new board"}
             size="sm"
             outerClass="w-full rounded-full"
             isLoading={loading}
