@@ -1,10 +1,10 @@
 import { InputText } from "primereact/inputtext";
 import { cn } from "../../../utils";
-import { FieldValues, Path, UseFormRegister } from "react-hook-form";
+import { Controller, Control, FieldValues, Path } from "react-hook-form";
 
 interface InputTextProps<TFormValues extends FieldValues> {
   name: Path<TFormValues>;
-  register: UseFormRegister<TFormValues>;
+  control: Control<TFormValues>;
   label?: string;
   placeholder?: string;
   labelClass?: string;
@@ -17,12 +17,12 @@ interface InputTextProps<TFormValues extends FieldValues> {
 
 export default function UiInputText<TFormValues extends FieldValues>({
   name,
+  control,
   label,
   placeholder,
   labelClass,
   error,
   requiredMark = false,
-  register,
   outerClass,
   prependIcon,
   appendIcon
@@ -36,30 +36,32 @@ export default function UiInputText<TFormValues extends FieldValues>({
         </label>
       )}
       <div className="relative">
-        <button
-          type="button"
-          className="absolute left-0 top-0 h-full w-10 flex items-center justify-center"
-        >
-          {prependIcon && prependIcon}
-        </button>
-        <InputText
-          id={name}
-          type="text"
-          className={cn("input-style", {
-            "pl-10": prependIcon,
-            "pr-10": appendIcon
-          })}
-          placeholder={placeholder}
-          {...register(name, {
-            required: `${label} is required`
-          })}
+        {prependIcon && (
+          <button className="absolute left-0 top-0 h-full w-10 flex items-center justify-center">
+            {prependIcon}
+          </button>
+        )}
+        <Controller
+          name={name}
+          control={control}
+          rules={requiredMark ? { required: `${label} is required` } : {}}
+          render={({ field }) => (
+            <InputText
+              {...field}
+              id={name}
+              className={cn("input-style", {
+                "pl-10": prependIcon,
+                "pr-10": appendIcon
+              })}
+              placeholder={placeholder}
+            />
+          )}
         />
-        <button
-          type="button"
-          className="absolute right-0 top-0 h-full w-10 flex items-center justify-center"
-        >
-          {appendIcon && appendIcon}
-        </button>
+        {appendIcon && (
+          <button className="absolute right-0 top-0 h-full w-10 flex items-center justify-center">
+            {appendIcon}
+          </button>
+        )}
       </div>
       {error && <small className="error-message">{error}</small>}
     </div>
