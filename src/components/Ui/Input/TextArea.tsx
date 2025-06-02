@@ -1,6 +1,12 @@
-import { cn } from "../../../utils";
-import { Controller, Control, FieldValues, Path } from "react-hook-form";
 import { InputTextarea } from "primereact/inputtextarea";
+import { cn } from "../../../utils";
+import {
+  Controller,
+  Control,
+  FieldValues,
+  Path,
+  RegisterOptions
+} from "react-hook-form";
 
 interface InputTextProps<TFormValues extends FieldValues> {
   name: Path<TFormValues>;
@@ -13,6 +19,7 @@ interface InputTextProps<TFormValues extends FieldValues> {
   outerClass?: string;
   prependIcon?: React.ReactNode;
   appendIcon?: React.ReactNode;
+  rules?: RegisterOptions<TFormValues, Path<TFormValues>>;
   rows?: number;
   cols?: number;
 }
@@ -28,6 +35,7 @@ export default function UiInputText<TFormValues extends FieldValues>({
   outerClass,
   prependIcon,
   appendIcon,
+  rules,
   rows,
   cols
 }: InputTextProps<TFormValues>) {
@@ -48,7 +56,10 @@ export default function UiInputText<TFormValues extends FieldValues>({
         <Controller
           name={name}
           control={control}
-          rules={requiredMark ? { required: `${label} is required` } : {}}
+          rules={{
+            ...(requiredMark ? { required: `${label} is required` } : {}),
+            ...rules
+          }}
           render={({ field }) => (
             <InputTextarea
               {...field}
