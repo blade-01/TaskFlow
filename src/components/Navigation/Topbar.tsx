@@ -6,30 +6,85 @@ import DropdownMenu from "../Ui/DropdownMenu";
 import { FaPlus } from "react-icons/fa";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import CenterModal from "../Ui/Modal/Center";
-import { useState } from "react";
-
+import DeleteModal from "../Ui/Modal/Delete";
+import { useEffect, useState } from "react";
+import { useMainStore } from "../../store/main";
+import { useNavigate } from "react-router";
+import BoardForm from "../Form/Board";
+import TaskForm from "../Form/Task";
+import { Timestamp } from "firebase/firestore";
 interface TopbarProps {
   title?: string;
 }
 
-export default function Topbar({ title }: TopbarProps) {
-  const { toggleSidebar } = useSidebar();
-  const [visible, setVisible] = useState<boolean>(false);
+interface BoardData {
+  name: string;
+  columns: { name: string; color: string; id: string }[];
+  createdAt: Timestamp;
+  createdBy: string;
+}
 
+export default function Topbar({ title }: TopbarProps) {
+  const navigateTo = useNavigate();
+  const { toggleSidebar } = useSidebar();
+  const [actions, setActions] = useState<{
+    addTask: boolean;
+    editTask: boolean;
+    editBoard: boolean;
+    deleteBoard: boolean;
+    isDeleting?: boolean;
+  }>({
+    addTask: false,
+    editTask: false,
+    editBoard: false,
+    deleteBoard: false,
+    isDeleting: false
+  });
+  const { deleteBoard, getBoardById, board } = useMainStore();
   const items = [
     {
       label: "Edit board",
       command: () => {
-        console.log("Edit board");
+        setActions({
+          ...actions,
+          editBoard: true
+        });
       }
     },
     {
       label: "Delete board",
       command: () => {
-        console.log("Delete board");
+        setActions({
+          ...actions,
+          deleteBoard: true
+        });
       }
     }
   ];
+
+  async function handleDeleteBoard() {
+    if (title) {
+      setActions({
+        ...actions,
+        isDeleting: true
+      });
+      await deleteBoard(title);
+      setTimeout(() => {
+        setActions({
+          ...actions,
+          deleteBoard: false,
+          isDeleting: false
+        });
+        navigateTo("/boards/welcome");
+      }, 1000);
+    }
+  }
+
+  useEffect(() => {
+    if (title) {
+      getBoardById(title);
+    }
+  }, [title]);
 
   return (
     <div className="flex items-center sticky top-0 w-full h-[var(--sidebar-height)] z-30 bg-sidebar-bg border-b border-b-border">
@@ -44,7 +99,7 @@ export default function Topbar({ title }: TopbarProps) {
               <FiMenu size={24} />
             </button>
             <p className="font-bold capitalize text-main-text">
-              {title ? truncateString(title, 20) : "..."}
+              {title ? truncateString(board?.name || "", 20) : "..."}
             </p>
           </div>
 
@@ -58,7 +113,12 @@ export default function Topbar({ title }: TopbarProps) {
             {/* Add board and menu */}
             <div
               className="icon-style h-9 w-9 md:w-fit bg-btn-bg md:px-4"
-              onClick={() => setVisible(true)}
+              onClick={() =>
+                setActions({
+                  ...actions,
+                  addTask: true
+                })
+              }
             >
               <div className="flex gap-1.5 items-center text-white">
                 <FaPlus size={15} />
@@ -72,14 +132,60 @@ export default function Topbar({ title }: TopbarProps) {
               icon={<HiOutlineDotsVertical size={20} />}
               outerClass="h-9 w-9"
             ></DropdownMenu>
-            {/* Center Modal */}
+            {/* Add Task */}
             <CenterModal
-              title="Modal Title"
-              visible={visible}
-              setVisible={(event) => setVisible(event)}
+              title="Add new task"
+              visible={actions.addTask}
+              setVisible={(event) =>
+                setActions({
+                  ...actions,
+                  addTask: event
+                })
+              }
             >
-              Hiii 👋🏼
+              <TaskForm
+                setVisible={(event) => {
+                  setActions({
+                    ...actions,
+                    addTask: event
+                  });
+                }}
+              />
             </CenterModal>
+            {/* Edit Board */}
+            <CenterModal
+              title="Edit Board"
+              visible={actions.editBoard}
+              setVisible={(event) =>
+                setActions({
+                  ...actions,
+                  editBoard: event
+                })
+              }
+            >
+              <BoardForm
+                setVisible={(event) => {
+                  setActions({
+                    ...actions,
+                    editBoard: event
+                  });
+                }}
+                isEdit
+                board={board as BoardData}
+              />
+            </CenterModal>
+            <DeleteModal
+              title="Delete Board"
+              visible={actions.deleteBoard}
+              isLoading={actions.isDeleting}
+              setVisible={(event) =>
+                setActions({
+                  ...actions,
+                  deleteBoard: event
+                })
+              }
+              handleDelete={() => handleDeleteBoard()}
+            ></DeleteModal>
           </div>
         </div>
       </div>
