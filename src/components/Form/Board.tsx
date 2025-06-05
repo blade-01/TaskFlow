@@ -9,13 +9,16 @@ import { useForm, SubmitHandler, useFieldArray } from "react-hook-form";
 import { getErrorMessage } from "../../utils/error";
 import { useMainStore } from "../../store/main";
 import { v4 as uuidv4 } from "uuid";
+import { TbMenuOrder } from "react-icons/tb";
 
 export default function Board({
   setVisible,
+  setShowColumn,
   isEdit = false,
   board
 }: {
   setVisible: (visible: boolean) => void;
+  setShowColumn?: (visible: boolean) => void;
   isEdit?: boolean;
   board?: {
     id?: string;
@@ -37,6 +40,7 @@ export default function Board({
     control,
     handleSubmit,
     reset,
+    register,
     formState: { errors }
   } = useForm<Inputs>({
     defaultValues: isEdit
@@ -60,11 +64,9 @@ export default function Board({
       columns: columns.map((column) => ({
         id: column.id || uuidv4(),
         name: column.name,
-        color:
-          column.color ||
-          "#" + Math.floor(Math.random() * 16777215).toString(16)
+        color: column.color || "#000000"
       })),
-      createdAt: Timestamp.now(),
+      createdAt: isEdit ? (board?.createdAt as Timestamp) : Timestamp.now(),
       createdBy: user?.uid || ""
     };
     try {
@@ -84,59 +86,82 @@ export default function Board({
   };
   return (
     <div>
-      <form onSubmit={handleSubmit(onSubmit)}>
-        <UiInputText
-          name="name"
-          label="Board Name"
-          placeholder="e.g. Business roadmap"
-          control={control}
-          requiredMark
-          error={errors.name?.message}
-        />
-        <p className="text-sm font-medium text-main-text mb-1 mt-5">
-          Board Columns
-        </p>
-        {fields.map((field, index) => (
-          <div key={field.id} className="flex gap-1.5 mb-2.5">
-            <UiInputText
-              name={`columns.${index}.name`}
-              label={`Column ${index + 1}`}
-              labelClass="hidden"
-              control={control}
-              requiredMark
-              error={errors.columns?.[index]?.name?.message}
-              outerClass="w-full"
-            />
-            <IoClose
-              size={25}
-              className="cursor-pointer mt-3 hover:scale-110 transition-all"
+      <div>
+        <form onSubmit={handleSubmit(onSubmit)}>
+          <UiInputText
+            name="name"
+            label="Board Name"
+            placeholder="e.g. Business roadmap"
+            control={control}
+            requiredMark
+            error={errors.name?.message}
+          />
+          <div className="flex justify-between items-end mb-2.5">
+            <p className="text-sm font-medium text-main-text  mt-5">
+              Board Columns
+            </p>
+
+            <div
+              className="flex items-end gap-2 cursor-pointer"
               onClick={() => {
-                if (fields?.length > 1) {
-                  remove(index);
-                }
+                setShowColumn?.(true);
               }}
+            >
+              <TbMenuOrder className=" mb-0.5" size={18} />
+              <p className="text-sm font-medium text-main-text">Rearrange</p>
+            </div>
+          </div>
+
+          {fields.map((field, index) => (
+            <div key={field.id} className="flex items-center gap-1.5 mb-2.5">
+              <UiInputText
+                name={`columns.${index}.name`}
+                label={`Column ${index + 1}`}
+                labelClass="hidden"
+                control={control}
+                requiredMark
+                error={errors.columns?.[index]?.name?.message}
+                outerClass="w-full"
+              />
+              <input
+                {...register(`columns.${index}.color`)}
+                key={index}
+                type="color"
+                className="h-8 w-10 rounded-sm"
+              />
+              <IoClose
+                size={25}
+                className="cursor-pointer mt-[1px] hover:scale-110 transition-all"
+                onClick={() => {
+                  if (fields?.length > 1) {
+                    remove(index);
+                  }
+                }}
+              />
+            </div>
+          ))}
+
+          <div className="flex flex-col gap-5 mt-5">
+            <UiBtn
+              label="Add new column"
+              size="sm"
+              outerClass="w-full  rounded-full bg-white border border-btn-bg text-btn-bg"
+              prependIcon={<FaPlus />}
+              onClick={() =>
+                append({ name: "", color: "#000000", id: uuidv4() })
+              }
+              type="button"
+            />
+
+            <UiBtn
+              label={isEdit ? "Save changes" : "Create new board"}
+              size="sm"
+              outerClass="w-full rounded-full"
+              isLoading={loading}
             />
           </div>
-        ))}
-
-        <div className="flex flex-col gap-5 mt-5">
-          <UiBtn
-            label="Add new column"
-            size="sm"
-            outerClass="w-full  rounded-full bg-white border border-btn-bg text-btn-bg"
-            prependIcon={<FaPlus />}
-            onClick={() => append({ name: "", color: "", id: uuidv4() })}
-            type="button"
-          />
-
-          <UiBtn
-            label={isEdit ? "Save changes" : "Create new board"}
-            size="sm"
-            outerClass="w-full rounded-full"
-            isLoading={loading}
-          />
-        </div>
-      </form>
+        </form>
+      </div>
     </div>
   );
 }
