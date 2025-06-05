@@ -80,22 +80,22 @@
             md:ml-[var(--sidebar-width-md)] 
             lg:ml-0 lg:w-full;
   }
-  .mainbar-content {
-    @apply p-4 flex items-start gap-5 overflow-x-auto;
+  .kanban-wrapper {
+    @apply p-4 flex items-start gap-5 overflow-auto;
   }
 
   .board-wrapper {
-    @apply h-[calc(90vh-var(--sidebar-height))] overflow-y-auto min-w-[280px];
+    @apply h-[calc(90vh-var(--sidebar-height))] overflow-auto min-w-[280px];
   }
 
-  .mainbar-content::-webkit-scrollbar {
+  .kanban-wrapper::-webkit-scrollbar {
     width: 2px !important;
     height: 8px !important;
   }
-  .mainbar-content::-webkit-scrollbar-track {
+  .kanban-wrapper::-webkit-scrollbar-track {
     background: var(--color-sidebar-bg);
   }
-  .mainbar-content::-webkit-scrollbar-thumb {
+  .kanban-wrapper::-webkit-scrollbar-thumb {
     background: var(--color-sidebar-text);
     border-radius: 50px !important;
   }
