@@ -11,17 +11,12 @@ import { useEffect, useState } from "react";
 import { useMainStore } from "../../store/main";
 import { useNavigate } from "react-router";
 import BoardForm from "../Form/Board";
+import BoardSorter from "../Form/BoardSorter";
 import TaskForm from "../Form/Task";
-import { Timestamp } from "firebase/firestore";
+import { BoardData } from "../../../types/board";
+
 interface TopbarProps {
   title?: string;
-}
-
-interface BoardData {
-  name: string;
-  columns: { name: string; color: string; id: string }[];
-  createdAt: Timestamp;
-  createdBy: string;
 }
 
 export default function Topbar({ title }: TopbarProps) {
@@ -32,12 +27,14 @@ export default function Topbar({ title }: TopbarProps) {
     editTask: boolean;
     editBoard: boolean;
     deleteBoard: boolean;
+    sortColumns: boolean;
     isDeleting?: boolean;
   }>({
     addTask: false,
     editTask: false,
     editBoard: false,
     deleteBoard: false,
+    sortColumns: false,
     isDeleting: false
   });
   const { deleteBoard, getBoardById, board } = useMainStore();
@@ -51,6 +48,7 @@ export default function Topbar({ title }: TopbarProps) {
         });
       }
     },
+
     {
       label: "Delete board",
       command: () => {
@@ -162,6 +160,7 @@ export default function Topbar({ title }: TopbarProps) {
                   editBoard: event
                 })
               }
+              persistent={false}
             >
               <BoardForm
                 setVisible={(event) => {
@@ -170,10 +169,18 @@ export default function Topbar({ title }: TopbarProps) {
                     editBoard: event
                   });
                 }}
+                setShowColumn={(event) => {
+                  setActions({
+                    ...actions,
+                    sortColumns: event,
+                    editBoard: false
+                  });
+                }}
                 isEdit
                 board={board as BoardData}
               />
             </CenterModal>
+            {/* Delete Board */}
             <DeleteModal
               title="Delete Board"
               visible={actions.deleteBoard}
@@ -186,6 +193,35 @@ export default function Topbar({ title }: TopbarProps) {
               }
               handleDelete={() => handleDeleteBoard()}
             ></DeleteModal>
+            {/* Sort Columns */}
+            <CenterModal
+              title="Rearrange Columns"
+              visible={actions.sortColumns}
+              setVisible={(event) =>
+                setActions({
+                  ...actions,
+                  sortColumns: event
+                })
+              }
+            >
+              <BoardSorter
+                setVisible={(event) => {
+                  setActions({
+                    ...actions,
+                    sortColumns: event
+                  });
+                  setTimeout(() => {
+                    setActions({
+                      ...actions,
+                      editBoard: true,
+                      sortColumns: false
+                    });
+                  }, 500);
+                }}
+                isEdit
+                board={board as BoardData}
+              />
+            </CenterModal>
           </div>
         </div>
       </div>
