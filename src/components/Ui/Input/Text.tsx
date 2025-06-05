@@ -47,7 +47,10 @@ export default function UiInputText<TFormValues extends FieldValues>({
       )}
       <div className="relative">
         {prependIcon && (
-          <button className="absolute left-0 top-0 h-full w-10 flex items-center justify-center">
+          <button
+            type="button"
+            className="absolute left-0 top-0 h-full w-10 flex items-center justify-center"
+          >
             {prependIcon}
           </button>
         )}
@@ -72,7 +75,10 @@ export default function UiInputText<TFormValues extends FieldValues>({
           )}
         />
         {appendIcon && (
-          <button className="absolute right-0 top-0 h-full w-10 flex items-center justify-center">
+          <button
+            type="button"
+            className="absolute right-0 top-0 h-full w-10 flex items-center justify-center cursor-move"
+          >
             {appendIcon}
           </button>
         )}
