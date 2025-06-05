@@ -1,7 +1,6 @@
 import { useState } from "react";
 import { IoClose } from "react-icons/io5";
 import { FaPlus } from "react-icons/fa6";
-// import useAuth from "../../hooks/useAuth";
 import { Timestamp } from "firebase/firestore";
 import UiInputText from "../Ui/Input/Text";
 import UiInputTextArea from "../Ui/Input/TextArea";
@@ -82,14 +81,15 @@ export default function Task({
           name: task.name,
           isCompleted: false
         })),
-      createdAt: Timestamp.now()
+      createdAt: isEdit ? (task?.createdAt as Timestamp) : Timestamp.now(),
+      order: 0
     };
     try {
       setLoading(true);
       if (isEdit && task) {
         await updateTask(task.id!, payload);
       } else {
-        await createTask(payload);
+        await createTask({ ...payload });
       }
     } catch (error) {
       getErrorMessage(error);
