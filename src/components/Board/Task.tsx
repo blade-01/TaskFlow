@@ -1,4 +1,3 @@
-import { Timestamp } from "firebase/firestore";
 import CenterModal from "../../components/Ui/Modal/Center";
 import { truncateString } from "../../utils";
 import { useEffect, useState } from "react";
@@ -10,16 +9,7 @@ import DropdownMenu from "../Ui/DropdownMenu";
 import { HiOutlineDotsVertical } from "react-icons/hi";
 import DeleteModal from "../Ui/Modal/Delete";
 import TaskForm from "../Form/Task";
-
-interface TaskData {
-  id?: string;
-  name: string;
-  description?: string;
-  subtasks: { name: string; isCompleted: boolean }[];
-  boardId: string;
-  status: string;
-  createdAt: Timestamp;
-}
+import { TaskData } from "../../../types/task";
 
 export default function Task({
   task,
