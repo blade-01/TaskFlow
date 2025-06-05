@@ -15,14 +15,7 @@ import {
 import { db } from "../firebase";
 import { getErrorMessage } from "../utils/error";
 import { v4 as uuidv4 } from "uuid";
-
-interface BoardData {
-  id?: string;
-  name: string;
-  columns: { name: string; color: string; id: string }[];
-  createdAt: Timestamp;
-  createdBy: string;
-}
+import { BoardData } from "../../types/board";
 
 interface TaskData {
   id?: string;
@@ -32,6 +25,7 @@ interface TaskData {
   boardId: string;
   status: string;
   createdAt: Timestamp;
+  order?: number;
 }
 
 export interface BoardState {
@@ -62,7 +56,7 @@ export const useBoardStore: StateCreator<BoardState> = (set, get) => ({
     try {
       const q = query(
         collection(db, "boards"),
-        where("createdBy", "in", ["admin", userId]),
+        where("createdBy", "in", ["welcome", userId]),
         orderBy("createdAt", "asc")
       );
 
@@ -111,7 +105,8 @@ export const useBoardStore: StateCreator<BoardState> = (set, get) => ({
       const q = query(
         collection(db, "tasks"),
         where("boardId", "==", boardId),
-        orderBy("createdAt", "asc")
+        orderBy("status"),
+        orderBy("order", "asc")
       );
 
       const unsubscribe = onSnapshot(q, (snapshot) => {
@@ -144,7 +139,7 @@ export const useBoardStore: StateCreator<BoardState> = (set, get) => ({
   },
   updateTask: async (id: string, payload: TaskData) => {
     await updateDoc(doc(db, "tasks", id), { ...payload, id });
-    get().getTaskById(id);
+    // get().getTaskById(id);
   },
   deleteTask: async (id: string) => {
     await deleteDoc(doc(db, "tasks", id));
