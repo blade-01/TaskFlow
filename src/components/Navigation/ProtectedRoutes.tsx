@@ -1,7 +1,7 @@
 import { Navigate } from "react-router";
 import { useEffect, useState } from "react";
 import { auth } from "../../firebase";
-import { Triangle } from "react-loader-spinner";
+import Loader from "../Ui/Loader/Triangle";
 
 export default function ProtectedRoute({
   children
@@ -20,19 +20,7 @@ export default function ProtectedRoute({
   }, []);
 
   if (!userChecked) {
-    return (
-      <div className="flex items-center justify-center h-screen text-xl">
-        <Triangle
-          visible={true}
-          height="80"
-          width="80"
-          color="#fd5d03"
-          ariaLabel="triangle-loading"
-          wrapperStyle={{}}
-          wrapperClass=""
-        />
-      </div>
-    );
+    return <Loader />;
   }
 
   return userExists ? children : <Navigate to="/auth" />;
