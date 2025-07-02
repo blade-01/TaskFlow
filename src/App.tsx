@@ -1,9 +1,12 @@
 import "@theme-toggles/react/css/Classic.css";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router";
+import { BrowserRouter as Router, Routes, Route } from "react-router";
 import { PrimeReactProvider } from "primereact/api";
 import Auth from "./pages/Auth";
 import { SidebarProvider } from "./context/SidebarContext";
+import Dashboard from "./components/Navigation/Dashboard";
 import Board from "./pages/Board";
+import Empty from "./pages/Empty";
+import Error from "./pages/Error";
 import ProtectedRoute from "./components/Navigation/ProtectedRoutes";
 
 function App() {
@@ -12,7 +15,7 @@ function App() {
       <SidebarProvider>
         <Router>
           <Routes>
-            <Route path="/" element={<Navigate to="/board/welcome" />} />
+            <Route path="/" element={<Dashboard />} />
             <Route
               path="/board/:id"
               element={
@@ -22,7 +25,8 @@ function App() {
               }
             />
             <Route path="/auth" element={<Auth />} />
-            <Route path="*" element={<Navigate to="/" />} />
+            <Route path="/no-board" element={<Empty />} />
+            <Route path="*" element={<Error />} />
           </Routes>
         </Router>
       </SidebarProvider>
