@@ -37,7 +37,9 @@ export default function Topbar({ title }: TopbarProps) {
     sortColumns: false,
     isDeleting: false
   });
-  const { deleteBoard, getBoardById, board } = useMainStore();
+
+  const { deleteBoard, getBoardById, board, boards } = useMainStore();
+
   const items = [
     {
       label: "Edit board",
@@ -48,7 +50,6 @@ export default function Topbar({ title }: TopbarProps) {
         });
       }
     },
-
     {
       label: "Delete board",
       command: () => {
@@ -60,20 +61,46 @@ export default function Topbar({ title }: TopbarProps) {
     }
   ];
 
+  function getNextBoardIdAfterDelete(boards: BoardData[], deletedId: string) {
+    const index = boards?.findIndex((b) => b.id === deletedId);
+    if (index === -1 || boards.length === 0) return null;
+
+    // Copy the array without the deleted one
+    const remaining = boards.filter((b) => b.id !== deletedId);
+
+    // Priority: next → previous → fallback
+    const next = remaining[index]; // same index (moved up)
+    const previous = remaining[index - 1]; // one above
+
+    return next?.id || previous?.id || null;
+  }
+
   async function handleDeleteBoard() {
     if (title) {
       setActions({
         ...actions,
         isDeleting: true
       });
+
       await deleteBoard(title);
+
+      const nextBoardId = getNextBoardIdAfterDelete(
+        boards as BoardData[],
+        title
+      );
+
       setTimeout(() => {
         setActions({
           ...actions,
           deleteBoard: false,
           isDeleting: false
         });
-        navigateTo("/boards/welcome");
+
+        if (nextBoardId) {
+          navigateTo(`/board/${nextBoardId}`);
+        } else {
+          navigateTo(`/no-board`);
+        }
       }, 1000);
     }
   }
@@ -125,11 +152,13 @@ export default function Topbar({ title }: TopbarProps) {
                 </p>
               </div>
             </div>
+
             <DropdownMenu
               items={items}
               icon={<HiOutlineDotsVertical size={20} />}
               outerClass="h-9 w-9"
             ></DropdownMenu>
+
             {/* Add Task */}
             <CenterModal
               title="Add new task"
