@@ -10,16 +10,20 @@ import { getErrorMessage } from "../../utils/error";
 import { useMainStore } from "../../store/main";
 import { v4 as uuidv4 } from "uuid";
 import { TbMenuOrder } from "react-icons/tb";
+import { useNavigate } from "react-router";
+import { cn } from "../../utils";
 
 export default function Board({
   setVisible,
   setShowColumn,
   isEdit = false,
+  isSortable = true,
   board
 }: {
   setVisible: (visible: boolean) => void;
   setShowColumn?: (visible: boolean) => void;
   isEdit?: boolean;
+  isSortable?: boolean;
   board?: {
     id?: string;
     name: string;
@@ -30,7 +34,7 @@ export default function Board({
 }) {
   const { user } = useAuth();
   const { createBoard, updateBoard } = useMainStore();
-
+  const navigateTo = useNavigate();
   type Inputs = {
     name: string;
     columns: { name: string; color: string; id?: string }[];
@@ -74,7 +78,8 @@ export default function Board({
       if (isEdit && board) {
         await updateBoard(board.id!, payload);
       } else {
-        await createBoard(payload);
+        const boardId = await createBoard(payload);
+        navigateTo(`/board/${boardId}`);
       }
     } catch (error) {
       getErrorMessage(error);
@@ -102,7 +107,10 @@ export default function Board({
             </p>
 
             <div
-              className="flex items-end gap-2 cursor-pointer"
+              className={cn(
+                "flex items-center gap-1.5 cursor-pointer",
+                isSortable ? "" : "hidden"
+              )}
               onClick={() => {
                 setShowColumn?.(true);
               }}
