@@ -56,7 +56,7 @@ export const useBoardStore: StateCreator<BoardState> = (set, get) => ({
     try {
       const q = query(
         collection(db, "boards"),
-        where("createdBy", "in", ["welcome", userId]),
+        where("createdBy", "==", userId),
         orderBy("createdAt", "asc")
       );
 
@@ -80,13 +80,17 @@ export const useBoardStore: StateCreator<BoardState> = (set, get) => ({
       const data = docSnap.data();
       const board: BoardData = data as BoardData;
       set({ board });
+      return board;
+    } else {
+      set({ board: null });
+      return null; // Board not found
     }
   },
   createBoard: async (payload: BoardData) => {
     const boardId = uuidv4(); // generate a stable ID
     const boardPayload = { ...payload, id: boardId };
     await setDoc(doc(db, "boards", boardId), boardPayload);
-    return true;
+    return boardId;
   },
   updateBoard: async (id: string, payload: BoardData) => {
     await updateDoc(doc(db, "boards", id), { ...payload, id });
@@ -94,6 +98,7 @@ export const useBoardStore: StateCreator<BoardState> = (set, get) => ({
   },
   deleteBoard: async (id: string) => {
     await deleteDoc(doc(db, "boards", id));
+    get().getBoardById(id);
     return true;
   },
 
