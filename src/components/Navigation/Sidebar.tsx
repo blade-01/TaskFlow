@@ -75,9 +75,9 @@ export default function Sidebar({ nav }: SidebarProps) {
     <div className={`sidebar ${nav ? "sidebar-opened" : ""}`}>
       <div className="sidebar-side">
         <div className="flex flex-col gap-2 items-center">
-          <NavLink to="/" className="sidebar--logo-style">
+          <div className="sidebar--logo-style">
             <img src={logo} alt="logo" className="w-7 h-8" />
-          </NavLink>
+          </div>
           <hr className="border-t border-t-border w-[50%]" />
         </div>
 
