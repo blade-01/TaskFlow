@@ -71,7 +71,7 @@ export default function UiInputDropdown<TFormValues extends FieldValues>({
             "pr-10": appendIcon
           })}
           pt={{
-            item: { className: "p-2" },
+            item: { className: "p-2 capitalize" },
             clearIcon: { className: "-mt-2 mr-2" }
           }}
           placeholder={placeholder}
