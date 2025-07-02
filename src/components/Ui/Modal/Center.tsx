@@ -30,27 +30,25 @@ export default function CenterModal({
   const footerContent = footer && <div>{footer}</div>;
 
   return (
-    <div className="card flex justify-content-center">
-      <Dialog
-        visible={visible}
-        header={headerElement}
-        footer={footerContent}
-        className="w-[90%] md:w-1/2 lg:w-1/3 mx-auto"
-        onHide={() => {
-          if (!visible) return;
-          setVisible(false);
-        }}
-        modal
-        pt={{
-          closeButton: {
-            className: showCloseButton ? "" : "hidden"
-          }
-        }}
-        draggable={draggable}
-        dismissableMask={persistent}
-      >
-        <div className="p-4">{children}</div>
-      </Dialog>
-    </div>
+    <Dialog
+      visible={visible}
+      header={headerElement}
+      footer={footerContent}
+      className="w-[90%] md:w-1/2 lg:w-1/3 mx-auto"
+      onHide={() => {
+        if (!visible) return;
+        setVisible(false);
+      }}
+      modal
+      pt={{
+        closeButton: {
+          className: showCloseButton ? "" : "hidden"
+        }
+      }}
+      draggable={draggable}
+      dismissableMask={persistent}
+    >
+      <div className="p-4">{children}</div>
+    </Dialog>
   );
 }
